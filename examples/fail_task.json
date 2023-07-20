@@ -1,0 +1,99 @@
+{
+    "containerDefinitions": [
+        {
+            "memory": 80,
+            "essential": true,
+            "name": "fail-container",
+            "image": "nvidia/cuda:11.0.3-base",
+            "resourceRequirements": [
+                {
+                    "type": "GPU",
+                    "value": "2"
+                }
+            ],
+            "command": [
+                "sh",
+                "-c",
+                "nvidia-smi"
+            ],
+            "cpu": 100,
+            "disableNetworking": true,
+            "dnsSearchDomains": [
+                "example.com"
+            ],
+            "dnsServers": [
+                "8.8.8.8"
+            ],
+            "dockerSecurityOptions": [
+                "label:type:test_virt"
+            ],
+            "extraHosts": [
+                {
+                    "hostname": "test",
+                    "ipAddress": "127.0.0.1"
+                }
+            ],
+            "links": [
+                "db:database"
+            ],
+            "privileged": true,
+            "systemControls": [
+                {
+                    "namespace": "net.core.somaxconn",
+                    "value": "1024"
+                }
+            ],
+            "linuxParameters": {
+                "devices": [
+                    {
+                        "hostPath": "/dev/sda",
+                        "containerPath": "/dev/sda"
+                    }
+                ],
+                "sharedMemorySize": 128,
+                "tmpfs": [
+                    {
+                        "containerPath": "/tmp",
+                        "size": 100
+                    }
+                ],
+                "capabilities": {
+                    "add": [
+                        "SYS_PTRACE",
+                        "NET_ADMIN"
+                    ]
+                }
+            },
+            "ulimits": [
+                {
+                    "name": "core",
+                    "softLimit": 1024,
+                    "hardLimit": 4096
+                }
+            ],
+            "logConfiguration": {
+                "logDriver": "json-file"
+            },
+            "stopTimeout": 150
+        }
+    ],
+    "networkMode": "bridge",
+    "volumes": [
+        {
+            "name": "unsupported-docker-volume",
+            "dockerVolumeConfiguration": {}
+        }
+    ],
+    "ephemeralStorage": {
+        "sizeInGiB": 11
+    },
+    "ipcMode": "host",
+    "pidMode": "host",
+    "placementConstraints": [
+        {
+            "type": "memberOf",
+            "expression": "attribute:ecs.instance-type =~ t2.*"
+        }
+    ],
+    "family": "fail-example"
+}
