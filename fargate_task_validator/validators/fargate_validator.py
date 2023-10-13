@@ -13,10 +13,21 @@ UNSUPPORTED_CONTAINER_PARAMETERS = [
 
 UNSUPPORTED_ROOT_PARAMETERS = [
     "ipcMode",
-    "pidMode",
     "placementConstraints",
 ]
 
+SUPPORTED_SYSCTLS = [
+    "net.*",
+    "fs.mqueue.*",
+    "kernel.msgmax",
+    "kernel.msgmnb",
+    "kernel.msgmni",
+    "kernel.sem",
+    "kernel.shmall",
+    "kernel.shmmax",
+    "kernel.shmmni",
+    "kernel.shm_rmid_forced",
+]
 
 def check_fargate_compatibility(task_definition_str):
     """
@@ -136,8 +147,8 @@ def check_fargate_compatibility(task_definition_str):
         feedback["computing"] = "FAIL"
     else:
         os_family = task_definition.get("runtimePlatform", {}).get(
-            "operatingSystemFamily", ""
-        )
+            "operatingSystemFamily", "LINUX"
+        )  # Make default "LINUX"
 
         if os_family not in valid_os_values:
             feedback["computing"] = "FAIL"
@@ -181,7 +192,11 @@ def check_fargate_compatibility(task_definition_str):
     container_definitions = task_definition.get("containerDefinitions", [{}])
     for container in container_definitions:
         log_config = container.get("logConfiguration", {})
-        if log_config.get("logDriver", "").lower() not in allowed_log_drivers:
+        # fail only logDriver exists
+        if (
+            log_config
+            and log_config.get("logDriver", "").lower() not in allowed_log_drivers
+        ):
             feedback["logConfiguration"] = "FAIL"
             break
     else:
@@ -220,5 +235,24 @@ def check_fargate_compatibility(task_definition_str):
                 break
         else:
             feedback["GPU"] = "OK"
+
+    # 14. pidMode Check
+    if "pidMode" in task_definition and task_definition["pidMode"] != "task":
+        feedback["pidMode"] = "FAIL"
+    else:
+        feedback["pidMode"] = "OK"
+
+    # sysctl Check
+    for container_def in task_definition.get("containerDefinitions", []):
+        sysctls = container_def.get("sysctl", [])
+        for sysctl in sysctls:
+            if not any(sysctl["name"].startswith(prefix) for prefix in SUPPORTED_SYSCTLS):
+                feedback["sysctl"] = "FAIL"
+                break
+        else:
+            continue
+        break
+    else:
+        feedback["sysctl"] = "OK"
 
     return feedback
