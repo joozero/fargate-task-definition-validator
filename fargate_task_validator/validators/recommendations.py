@@ -23,6 +23,8 @@ RECOMMENDATIONS = {
     "stopTimeout": "Ensure the stop timeout value in your task definition does not exceed the Fargate limit.",
     "GPU": "GPU configurations are not supported in Fargate.",
     "computing": "Ensure the computing configurations in your task definition are compatible with Fargate.",
+    "pidMode": "Ensure you're using a supported 'pidMode' for Fargate. Only 'task' is supported.",
+    "sysctl": "Ensure the sysctl parameters in your task definition are supported in Fargate.",
 }
 
 REMEDIATIONS = {
@@ -45,6 +47,8 @@ REMEDIATIONS = {
     "stopTimeout": "Adjust the 'stopTimeout' in your task definition to be within Fargate's limits.",
     "GPU": "Remove GPU configurations from your task definition.",
     "computing": "Ensure the computing settings in your task definition are Fargate-compatible.",
+    "pidMode": "Change the 'pidMode' in your task definition to 'task' for Fargate compatibility.",
+    "sysctl": "Adjust or remove unsupported sysctl parameters from your task definition.",
 }
 
 for param in UNSUPPORTED_CONTAINER_PARAMETERS + UNSUPPORTED_ROOT_PARAMETERS:

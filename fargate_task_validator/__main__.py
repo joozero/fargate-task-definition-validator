@@ -56,9 +56,9 @@ def display_results(results):
 def validate_task_definition(task_definition):
     try:
         validator.validate(task_definition)
-        return "Task definition is valid!"
+        return "Task definition schema is valid!"
     except ValidationError as e:
-        return f"Task definition is invalid! {e}"
+        return f"Task definition schema is invalid! {e}"
 
 
 def main():
@@ -71,11 +71,11 @@ def main():
     with open(task_definition_path, "r") as f:
         task_definition_str = f.read()
 
-    results = check_fargate_compatibility(task_definition_str)
-    display_results(results)
-
     result = validate_task_definition(json.loads(task_definition_str))
     print(result)
+
+    results = check_fargate_compatibility(task_definition_str)
+    display_results(results)
 
 
 if __name__ == "__main__":
